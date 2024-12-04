@@ -34,4 +34,3 @@ fn test_game_flow() {
     let res = program.send(2, PebblesAction::Turn(2));
     assert!(!res.main_failed());
 }
-

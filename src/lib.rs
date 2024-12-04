@@ -1,5 +1,5 @@
 #![no_std]
-use gstd::{msg, prelude::*, ActorId, exec};
+use gstd::{exec, msg, prelude::*, ActorId};
 use pebbles_game_io::*;
 
 static mut GAME_STATE: Option<GameState> = None;
@@ -13,11 +13,17 @@ fn get_random_u32() -> u32 {
 #[no_mangle]
 extern "C" fn init() {
     let init_config: PebblesInit = msg::load().expect("Failed to decode PebblesInit");
-    
+
     // 验证输入数据
-    assert!(init_config.pebbles_count > 0, "Pebbles count must be positive");
-    assert!(init_config.max_pebbles_per_turn > 0 && init_config.max_pebbles_per_turn <= init_config.pebbles_count,
-            "Invalid max pebbles per turn");
+    assert!(
+        init_config.pebbles_count > 0,
+        "Pebbles count must be positive"
+    );
+    assert!(
+        init_config.max_pebbles_per_turn > 0
+            && init_config.max_pebbles_per_turn <= init_config.pebbles_count,
+        "Invalid max pebbles per turn"
+    );
 
     // 随机选择第一个玩家
     let first_player = if get_random_u32() % 2 == 0 {
@@ -53,10 +59,14 @@ extern "C" fn handle() {
     match action {
         PebblesAction::Turn(pebbles) => {
             // 验证玩家移动
-            assert!(pebbles > 0 && pebbles <= state.max_pebbles_per_turn, 
-                   "Invalid number of pebbles");
-            assert!(pebbles <= state.pebbles_remaining, 
-                   "Not enough pebbles remaining");
+            assert!(
+                pebbles > 0 && pebbles <= state.max_pebbles_per_turn,
+                "Invalid number of pebbles"
+            );
+            assert!(
+                pebbles <= state.pebbles_remaining,
+                "Not enough pebbles remaining"
+            );
 
             // 更新状态
             state.pebbles_remaining -= pebbles;
@@ -64,8 +74,7 @@ extern "C" fn handle() {
             // 检查玩家是否获胜
             if state.pebbles_remaining == 0 {
                 state.winner = Some(Player::User);
-                msg::reply(PebblesEvent::Won(Player::User), 0)
-                    .expect("Failed to send win event");
+                msg::reply(PebblesEvent::Won(Player::User), 0).expect("Failed to send win event");
                 return;
             }
 
@@ -77,14 +86,22 @@ extern "C" fn handle() {
             msg::reply(PebblesEvent::Won(Player::Program), 0)
                 .expect("Failed to send give up event");
         }
-        PebblesAction::Restart { difficulty, pebbles_count, max_pebbles_per_turn } => {
+        PebblesAction::Restart {
+            difficulty,
+            pebbles_count,
+            max_pebbles_per_turn,
+        } => {
             // 重置游戏状态
             *state = GameState {
                 pebbles_count,
                 max_pebbles_per_turn,
                 pebbles_remaining: pebbles_count,
                 difficulty,
-                first_player: if get_random_u32() % 2 == 0 { Player::User } else { Player::Program },
+                first_player: if get_random_u32() % 2 == 0 {
+                    Player::User
+                } else {
+                    Player::Program
+                },
                 winner: None,
             };
 
@@ -97,7 +114,7 @@ extern "C" fn handle() {
 
 fn make_program_turn() {
     let state = unsafe { GAME_STATE.as_mut().expect("Game state not initialized") };
-    
+
     let pebbles_to_remove = match state.difficulty {
         DifficultyLevel::Easy => {
             // 随机选择移除的石子数量
@@ -136,4 +153,4 @@ fn calculate_winning_move(remaining: u32, max_per_turn: u32) -> u32 {
 extern "C" fn state() {
     let state = unsafe { GAME_STATE.as_ref().expect("Game state not initialized") };
     msg::reply(state.clone(), 0).expect("Failed to send state");
-} 
+}

@@ -64,6 +64,7 @@ extern "C" fn handle() {
                 "Not enough pebbles remaining"
             );
 
+
             state.pebbles_remaining -= pebbles;
 
             if state.pebbles_remaining == 0 {
@@ -84,6 +85,7 @@ extern "C" fn handle() {
             pebbles_count,
             max_pebbles_per_turn,
         } => {
+
             *state = GameState {
                 pebbles_count,
                 max_pebbles_per_turn,
@@ -109,9 +111,11 @@ fn make_program_turn() {
 
     let pebbles_to_remove = match state.difficulty {
         DifficultyLevel::Easy => {
+
             (get_random_u32() % state.max_pebbles_per_turn.min(state.pebbles_remaining)) + 1
         }
         DifficultyLevel::Hard => {
+
             calculate_winning_move(state.pebbles_remaining, state.max_pebbles_per_turn)
         }
     };
@@ -129,6 +133,7 @@ fn make_program_turn() {
 }
 
 fn calculate_winning_move(remaining: u32, max_per_turn: u32) -> u32 {
+
     let target = remaining % (max_per_turn + 1);
     if target == 0 {
         1

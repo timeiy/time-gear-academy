@@ -14,7 +14,6 @@ fn get_random_u32() -> u32 {
 extern "C" fn init() {
     let init_config: PebblesInit = msg::load().expect("Failed to decode PebblesInit");
 
-    // 验证输入数据
     assert!(
         init_config.pebbles_count > 0,
         "Pebbles count must be positive"
@@ -25,7 +24,6 @@ extern "C" fn init() {
         "Invalid max pebbles per turn"
     );
 
-    // 随机选择第一个玩家
     let first_player = if get_random_u32() % 2 == 0 {
         Player::Program
     } else {
@@ -45,7 +43,6 @@ extern "C" fn init() {
         GAME_STATE = Some(state);
     }
 
-    // 如果程序先手，进行第一步
     if matches!(first_player, Player::Program) {
         make_program_turn();
     }
@@ -58,7 +55,6 @@ extern "C" fn handle() {
 
     match action {
         PebblesAction::Turn(pebbles) => {
-            // 验证玩家移动
             assert!(
                 pebbles > 0 && pebbles <= state.max_pebbles_per_turn,
                 "Invalid number of pebbles"
@@ -68,17 +64,15 @@ extern "C" fn handle() {
                 "Not enough pebbles remaining"
             );
 
-            // 更新状态
+
             state.pebbles_remaining -= pebbles;
 
-            // 检查玩家是否获胜
             if state.pebbles_remaining == 0 {
                 state.winner = Some(Player::User);
                 msg::reply(PebblesEvent::Won(Player::User), 0).expect("Failed to send win event");
                 return;
             }
 
-            // 程序回合
             make_program_turn();
         }
         PebblesAction::GiveUp => {
@@ -91,7 +85,7 @@ extern "C" fn handle() {
             pebbles_count,
             max_pebbles_per_turn,
         } => {
-            // 重置游戏状态
+
             *state = GameState {
                 pebbles_count,
                 max_pebbles_per_turn,
@@ -117,11 +111,11 @@ fn make_program_turn() {
 
     let pebbles_to_remove = match state.difficulty {
         DifficultyLevel::Easy => {
-            // 随机选择移除的石子数量
+
             (get_random_u32() % state.max_pebbles_per_turn.min(state.pebbles_remaining)) + 1
         }
         DifficultyLevel::Hard => {
-            // 实现获胜策略
+
             calculate_winning_move(state.pebbles_remaining, state.max_pebbles_per_turn)
         }
     };
@@ -139,8 +133,7 @@ fn make_program_turn() {
 }
 
 fn calculate_winning_move(remaining: u32, max_per_turn: u32) -> u32 {
-    // 在困难模式下计算最佳移动
-    // 这里实现一个简单的策略：尽量让剩余数量为 (max_per_turn + 1) 的倍数
+
     let target = remaining % (max_per_turn + 1);
     if target == 0 {
         1

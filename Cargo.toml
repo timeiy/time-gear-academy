@@ -1,0 +1,19 @@
+[package]
+name = "pebbles-game"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gstd = { git = "https://github.com/gear-tech/gear.git", tag = "v1.4.2" }
+pebbles-game-io = { path = "io" }
+curve25519-dalek = "4.1.3"
+digest = "0.10.7"
+wasmi = { git = "https://github.com/gear-tech/wasmi", branch = "gear-v0.30.0" }
+ark-ff = "0.5.0"
+ark-ec = "0.5.0"
+
+[build-dependencies]
+gear-wasm-builder = { git = "https://github.com/gear-tech/gear.git", tag = "v1.4.2" }
+
+[dev-dependencies]
+gtest = { git = "https://github.com/gear-tech/gear.git", tag = "v1.4.2" } 

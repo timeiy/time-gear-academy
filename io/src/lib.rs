@@ -1,3 +1,4 @@
+#![no_std]
 use gmeta::{In, InOut, Metadata, Out};
 use gstd::{prelude::*, ActorId};
 use parity_scale_codec::{Decode, Encode};
